@@ -72,7 +72,7 @@ int main(){
                 printf("\n\n\t1.\tVer datos completos.\n"); // comprobacion
                 copiarArchivoModificado(nombre_archivo_origen, nombre_archivo_destino);
                 mostrarDatosCompletos(nombre_archivo_destino);
-                rewind(nombre_archivo_destino);
+
 
                 break;
 
@@ -254,159 +254,123 @@ void menuprincipal(void){
 
 
 void ordenarMenorMayor(const char* nombre_origen, const char* nombre_destino) {
-    FILE *archivo_origen, *archivo_destino;
-    char caracter;
-    char* datos;
-    int num_datos = 0;
+    FILE* archivo_origen = fopen("generacion.csv", "r");
+    FILE* archivo_destino = fopen("menormayor.txt", "w");
 
-    archivo_origen = fopen("generacion.csv", "r");
-    if (archivo_origen == NULL) {
-        printf("No se pudo abrir el archivo de origen.\n");
-        return;
-    }
-
-    archivo_destino = fopen("menormayor.txt", "a");
-    if (archivo_destino == NULL) {
-        printf("No se pudo abrir el archivo de destino.\n");
+    if (archivo_origen == NULL || archivo_destino == NULL) {
+        printf("No se pudo abrir el archivo.\n");
         return;
     }
 
     // Saltar las primeras 5 filas
     for (int i = 0; i < 5; i++) {
-        while ((caracter = fgetc(archivo_origen)) != '\n' && caracter != EOF);
-    }
-
-    // Obtener el número de datos en el archivo de origen
-    while ((caracter = fgetc(archivo_origen)) != EOF) {
-        if (caracter == ',' || caracter == ';') {
-            num_datos++;
-        }
-    }
-    num_datos++;  // Sumar uno más para contar el último dato sin coma o punto y coma
-
-    // Volver al inicio del archivo de origen
-    fseek(archivo_origen, 0, SEEK_SET);
-
-    // Saltar las primeras 5 filas
-    for (int i = 0; i < 5; i++) {
+        char caracter;
         while ((caracter = fgetc(archivo_origen)) != '\n' && caracter != EOF);
     }
 
     // Leer y almacenar los datos en un arreglo
-    datos = (char*)malloc(num_datos * sizeof(char));
-    int i = 0;
+    int capacidad = 100;
+    char* datos = (char*)malloc(capacidad * sizeof(char));
+    int num_datos = 0;
+    char caracter;
     while ((caracter = fgetc(archivo_origen)) != EOF) {
         if (caracter != ',' && caracter != ';') {
-            datos[i] = caracter;
-            i++;
+            datos[num_datos++] = caracter;
+            if (num_datos == capacidad) {
+                capacidad *= 2;
+                datos = (char*)realloc(datos, capacidad * sizeof(char));
+            }
         }
     }
-    datos[i] = '\0';  // Agregar el carácter nulo al final del arreglo de datos
+    datos[num_datos] = '\0';
 
     // Ordenar los datos de menor a mayor
-    for (int j = 0; j < num_datos - 1; j++) {
-        for (int k = j + 1; k < num_datos; k++) {
-            if (datos[j] > datos[k]) {
-                char temp = datos[j];
-                datos[j] = datos[k];
-                datos[k] = temp;
+    for (int i = 0; i < num_datos - 1; i++) {
+        for (int j = i + 1; j < num_datos; j++) {
+            if (datos[i] > datos[j]) {
+                char temp = datos[i];
+                datos[i] = datos[j];
+                datos[j] = temp;
             }
         }
     }
 
-    // Guardar los datos ordenados en el archivo de destino
-    for (int j = 0; j < num_datos - 1; j++) {
-        if (datos[j] == ',' || datos[j] == ';') {
+    // Escribir los datos ordenados en el archivo destino y mostrarlos en pantalla
+    for (int i = 0; i < num_datos; i++) {
+        if (datos[i] == ',' || datos[i] == ';') {
             fputc(' ', archivo_destino);
+            printf(" ");
         } else {
-            fputc(datos[j], archivo_destino);
+            fputc(datos[i], archivo_destino);
+            printf("%c", datos[i]);
         }
     }
-    fputc(datos[num_datos - 1], archivo_destino);
-
-    printf("El archivo ha sido copiado y ordenado de menor a mayor correctamente.\n");
 
     fclose(archivo_origen);
     fclose(archivo_destino);
     free(datos);
+
+    printf("\nEl archivo ha sido copiado y ordenado de menor a mayor correctamente.\n");
 }
 
 void ordenarMayorMenor(const char* nombre_origen, const char* nombre_destino) {
-    FILE *archivo_origen, *archivo_destino;
-    char caracter;
-    char* datos;
-    int num_datos = 0;
+    FILE* archivo_origen = fopen("generacion.csv", "r");
+    FILE* archivo_destino = fopen("mayormenor.txt", "w");
 
-    archivo_origen = fopen("generacion.csv", "r");
-    if (archivo_origen == NULL) {
-        printf("No se pudo abrir el archivo de origen.\n");
-        return;
-    }
-
-    archivo_destino = fopen("mayormenor.txt", "a");
-    if (archivo_destino == NULL) {
-        printf("No se pudo abrir el archivo de destino.\n");
+    if (archivo_origen == NULL || archivo_destino == NULL) {
+        printf("No se pudo abrir el archivo.\n");
         return;
     }
 
     // Saltar las primeras 5 filas
     for (int i = 0; i < 5; i++) {
-        while ((caracter = fgetc(archivo_origen)) != '\n' && caracter != EOF);
-    }
-
-    // Obtener el número de datos en el archivo de origen
-    while ((caracter = fgetc(archivo_origen)) != EOF) {
-        if (caracter == ',' || caracter == ';') {
-            num_datos++;
-        }
-    }
-    num_datos++;  // Sumar uno más para contar el último dato sin coma o punto y coma
-
-    // Volver al inicio del archivo de origen
-    fseek(archivo_origen, 0, SEEK_SET);
-
-    // Saltar las primeras 5 filas
-    for (int i = 0; i < 5; i++) {
+        char caracter;
         while ((caracter = fgetc(archivo_origen)) != '\n' && caracter != EOF);
     }
 
     // Leer y almacenar los datos en un arreglo
-    datos = (char*)malloc(num_datos * sizeof(char));
-    int i = 0;
+    int capacidad = 100;
+    char* datos = (char*)malloc(capacidad * sizeof(char));
+    int num_datos = 0;
+    char caracter;
     while ((caracter = fgetc(archivo_origen)) != EOF) {
         if (caracter != ',' && caracter != ';') {
-            datos[i] = caracter;
-            i++;
+            datos[num_datos++] = caracter;
+            if (num_datos == capacidad) {
+                capacidad *= 2;
+                datos = (char*)realloc(datos, capacidad * sizeof(char));
+            }
         }
     }
-    datos[i] = '\0';  // Agregar el carácter nulo al final del arreglo de datos
+    datos[num_datos] = '\0';
 
     // Ordenar los datos de mayor a menor
-    for (int j = 0; j < num_datos - 1; j++) {
-        for (int k = j + 1; k < num_datos; k++) {
-            if (datos[j] < datos[k]) {
-                char temp = datos[j];
-                datos[j] = datos[k];
-                datos[k] = temp;
+    for (int i = 0; i < num_datos - 1; i++) {
+        for (int j = i + 1; j < num_datos; j++) {
+            if (datos[i] < datos[j]) {
+                char temp = datos[i];
+                datos[i] = datos[j];
+                datos[j] = temp;
             }
         }
     }
 
-    // Guardar los datos ordenados en el archivo de destino
-    for (int j = 0; j < num_datos - 1; j++) {
-        if (datos[j] == ',' || datos[j] == ';') {
+    // Escribir los datos ordenados en el archivo destino y mostrarlos en pantalla
+    for (int i = 0; i < num_datos; i++) {
+        if (datos[i] == ',' || datos[i] == ';') {
             fputc(' ', archivo_destino);
+            printf(" ");
         } else {
-            fputc(datos[j], archivo_destino);
+            fputc(datos[i], archivo_destino);
+            printf("%c", datos[i]);
         }
     }
-    fputc(datos[num_datos - 1], archivo_destino);
-
-    printf("El archivo ha sido copiado y ordenado de mayor a menor correctamente.\n");
 
     fclose(archivo_origen);
     fclose(archivo_destino);
     free(datos);
+
+    printf("\nEl archivo ha sido copiado y ordenado de mayor a menor correctamente.\n");
 }
 
 
